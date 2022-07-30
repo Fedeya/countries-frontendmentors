@@ -1,9 +1,14 @@
 import { useTheme } from 'next-themes';
 import Link from 'next/link';
-import { FC } from 'react';
+import { FC, useEffect, useState } from 'react';
 
 const Layout: FC<{ children: React.ReactElement }> = ({ children }) => {
   const { resolvedTheme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <div>
@@ -12,11 +17,15 @@ const Layout: FC<{ children: React.ReactElement }> = ({ children }) => {
           <a className="font-bold text-2xl">Where in the world</a>
         </Link>
 
-        <button
-          onClick={() => setTheme(resolvedTheme === 'light' ? 'dark' : 'light')}
-        >
-          {resolvedTheme === 'light' ? 'Dark Mode' : 'Light Mode'}
-        </button>
+        {mounted && (
+          <button
+            onClick={() =>
+              setTheme(resolvedTheme === 'light' ? 'dark' : 'light')
+            }
+          >
+            {resolvedTheme === 'light' ? 'Dark Mode' : 'Light Mode'}
+          </button>
+        )}
       </nav>
       <main className="dark:bg-gray-900">{children}</main>
     </div>

@@ -1,7 +1,8 @@
 import { Country } from '@/typings';
-import { FC, useMemo } from 'react';
+import { FC, useCallback, useMemo, useState, useEffect } from 'react';
 import CountryCard from './CountryCard';
-import { useFilters } from '../contexts/FiltersContext';
+import { useFilters } from '@/contexts/FiltersContext';
+import { VirtuosoGrid } from 'react-virtuoso';
 
 type CountriesListProps = {
   countries: Country[];
@@ -9,6 +10,7 @@ type CountriesListProps = {
 
 const CountriesList: FC<CountriesListProps> = ({ countries }) => {
   const { region, term } = useFilters();
+  const [take, setTake] = useState(10);
 
   const filteredCountries = useMemo(() => {
     let filteredCountries = countries;
@@ -25,16 +27,32 @@ const CountriesList: FC<CountriesListProps> = ({ countries }) => {
       );
     }
 
-    return filteredCountries;
-  }, [countries, term, region]);
+    return filteredCountries.slice(0, take);
+  }, [countries, term, region, take]);
+
+  const loadMore = useCallback(() => {
+    if (filteredCountries.length + 10 > take) setTake(t => t + 10);
+  }, [filteredCountries, take]);
+
+  useEffect(() => {
+    setTake(10);
+  }, [region, term]);
 
   return (
     <div>
-      <div className="grid gap-10 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-        {filteredCountries.map(country => (
-          <CountryCard key={country.name.common} country={country} />
-        ))}
-      </div>
+      <VirtuosoGrid
+        useWindowScroll
+        overscan={50}
+        endReached={loadMore}
+        totalCount={filteredCountries.length}
+        listClassName="grid gap-10 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"
+        itemContent={index => (
+          <CountryCard
+            key={filteredCountries[index].name.common}
+            country={filteredCountries[index]}
+          />
+        )}
+      />
     </div>
   );
 };

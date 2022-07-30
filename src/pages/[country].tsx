@@ -14,8 +14,6 @@ type CountryProps = InferGetStaticPropsType<typeof getStaticProps>;
 const Country: NextPage<CountryProps> = ({ country, countriesNames }) => {
   const router = useRouter();
 
-  console.log(countriesNames, country.borders);
-
   return (
     <div className="px-20 py-10">
       <Head>
